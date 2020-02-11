@@ -7,7 +7,6 @@ class Address;
 
 class Socket {
     public:
-        // Socket() {}
         explicit Socket(int sockfd_) : sockfd (sockfd_) {}
         ~Socket();
         int getSockfd (void) { return sockfd; }

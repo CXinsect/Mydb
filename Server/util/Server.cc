@@ -536,7 +536,7 @@ std::string Server::commandRequest(Buffer *buf)
     else
     {
         std::cout << "[Server::commandRequest:] No Command " << std::endl;
-        res = Status::InvalidArgument("No Command").ToString();
+        res = Status::InvalidArgument("No Command").ToString();   
     }
     return res;
 }
