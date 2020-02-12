@@ -18,6 +18,10 @@ void Server::Init()
     cmdtable_.insert(make_pair("hset", std::bind(&Server::hsetCommand, this, _1)));
     cmdtable_.insert(make_pair("hget", std::bind(&Server::hgetCommand, this, _1)));
     cmdtable_.insert(make_pair("hgetall", std::bind(&Server::hgetallCommand, this, _1)));
+    cmdtable_.insert(make_pair("zadd",std::bind(&Server::zaddCommand, this, _1)));
+    // cmdtable_.insert(make_pair("zcard",std::bind(&Server::zcardCommand, this, _1)));
+    // cmdtable_.insert(make_pair("zcount",std::bind(&Server::zcountCommand, this, _1)));
+    // cmdtable_.insert(make_pair("zrange",std::bind(&Server::zrangeCommand, this, _1)));
 }
 void Server::onConnection(const AcceptorPtr &conn)
 {
@@ -161,6 +165,23 @@ void Server::rdbSave()
     }
     else
         cout << "fork error" << endl;
+}
+const string Server::zaddCommand(const vector<string>& argv) {
+    cout << "zaddCommand" << endl;
+    if(argv.size() != 4) return Status::IOError("Wrong parameter").ToString();
+    bool flags = database_[dbIndex_]->addKeySpace(DataStructure::ObjZset,
+                                                  DataStructure::EncodingSkipList,
+                                                  argv[2], argv[3],
+                                                  DataStructure::SpareTire,
+                                                  DefaultTime);
+    if (!flags)
+    {
+        return Status::IOError("Set error").ToString();
+    }
+    else
+    {
+        return Status().ToString();
+    }
 }
 const std::string Server::getCommand(const vector<string> &argv)
 {
@@ -532,6 +553,31 @@ std::string Server::commandRequest(Buffer *buf)
             res = Status::NotFound("Not Found This Command hgetall").ToString();
         else
             res = it->second(v);
+    } else if(cmd_ == "zadd") {
+        auto it = cmdtable_.find(cmd_);
+        if (it == cmdtable_.end())
+            res = Status::NotFound("Not Found This Command rpush").ToString();
+        else
+        {
+            vector<string> v;
+            pos = org.find('$', ret);
+            ret = org.find(dst.c_str(), pos, 2);
+            keylen_ = atoi(org.substr(pos + 1, ret).c_str());
+            key_ = org.substr(ret + dst.size(), keylen_);
+            pos = org.find('$', ret);
+            ret = org.find(dst.c_str(), pos, 2);
+            skeylen_ = atoi(org.substr(pos + 1, ret).c_str());
+            skey_ = org.substr(ret + dst.size(), skeylen_);
+            pos = org.find('$',ret);
+            ret = org.find(dst.c_str(),pos,2);
+            valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
+            value_ = org.substr(ret+dst.size(),valuelen_);
+            v.push_back(cmd_);
+            v.push_back(key_);
+            v.push_back(skey_);
+            v.push_back(value_);
+            res = it->second(v);
+        }
     }
     else
     {

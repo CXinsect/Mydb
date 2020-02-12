@@ -41,10 +41,12 @@ namespace DataStructure
 const int ObjString = 0;
 const int ObjHash = 1;
 const int ObjList = 2;
+const int ObjZset = 3;
 //编码
 const int EncodingString = 0;
 const int EncodingDict = 1;
 const int EncodingLinkedList = 2;
+const int EncodingSkipList = 3;
 //事件属性
 const int NoEvent = 0;
 const int ReadEvent = 1;

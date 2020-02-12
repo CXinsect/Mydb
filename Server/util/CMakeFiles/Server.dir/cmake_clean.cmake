@@ -10,6 +10,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/Server.dir/SocketOpts.cc.o"
   "CMakeFiles/Server.dir/dataBase.cc.o"
   "CMakeFiles/Server.dir/main.cc.o"
+  "CMakeFiles/Server.dir/skiplist.cc.o"
   "CMakeFiles/Server.dir/status.cc.o"
   "Server"
   "Server.pdb"

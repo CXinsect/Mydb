@@ -51,6 +51,7 @@ CMakeFiles/Server.dir/Server.cc.o: Socket.h
 CMakeFiles/Server.dir/Server.cc.o: SocketOpts.h
 CMakeFiles/Server.dir/Server.cc.o: dataBase.h
 CMakeFiles/Server.dir/Server.cc.o: modelHead.h
+CMakeFiles/Server.dir/Server.cc.o: skiplist.h
 CMakeFiles/Server.dir/Server.cc.o: status.h
 
 CMakeFiles/Server.dir/Socket.cc.o: InetAddress.h
@@ -67,6 +68,7 @@ CMakeFiles/Server.dir/dataBase.cc.o: LRU.h
 CMakeFiles/Server.dir/dataBase.cc.o: dataBase.cc
 CMakeFiles/Server.dir/dataBase.cc.o: dataBase.h
 CMakeFiles/Server.dir/dataBase.cc.o: modelHead.h
+CMakeFiles/Server.dir/dataBase.cc.o: skiplist.h
 CMakeFiles/Server.dir/dataBase.cc.o: status.h
 
 CMakeFiles/Server.dir/main.cc.o: Accept.h
@@ -81,6 +83,9 @@ CMakeFiles/Server.dir/main.cc.o: SocketOpts.h
 CMakeFiles/Server.dir/main.cc.o: main.cc
 CMakeFiles/Server.dir/main.cc.o: modelHead.h
 CMakeFiles/Server.dir/main.cc.o: status.h
+
+CMakeFiles/Server.dir/skiplist.cc.o: skiplist.cc
+CMakeFiles/Server.dir/skiplist.cc.o: skiplist.h
 
 CMakeFiles/Server.dir/status.cc.o: status.cc
 CMakeFiles/Server.dir/status.cc.o: status.h

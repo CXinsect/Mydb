@@ -5,9 +5,8 @@
 #include "modelHead.h"
 #include "status.h"
 #include "LRU.h"
+#include "skiplist.h"
 #include <unordered_map>
-
-class redisPersistence;
 
 using namespace std;
 using namespace Mydb;
@@ -15,7 +14,7 @@ using namespace Mydb;
 class DataBase
 {
 public:
-  DataBase(){};
+  DataBase() : skip_(new skiplist(8,0.25)) {};
   ~DataBase() {}
 
 public:
@@ -58,6 +57,8 @@ private:
   String String_;
   Hash Hash_;
   List List_;
+  shared_ptr<skiplist> skip_;
+
 
 private:
   //过期时间

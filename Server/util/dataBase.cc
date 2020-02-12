@@ -86,6 +86,8 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       lMap_.insert(make_pair(key, tempTime));
       listLRu_.set(key, tmp);
     }
+  } else if(type == DataStructure::ObjZset) {
+      skip_->insertNode(atoi(key.c_str()),value);
   }
   else
   {

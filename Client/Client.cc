@@ -146,7 +146,7 @@ void Client::sendRequest( const std::string &buf ) {
         }
         snprintf(buffer,sizeof(buffer),"*%d\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",count,(int)cmd.size(),cmd.c_str(),
                                                           (int)key.size(),key.c_str(),
-                                                           strlen(_buf),_buf);
+                                                           static_cast<int>(strlen(_buf)),_buf);
         AuxiliaryFun(buffer);
 
     } else if(cmd == "rpop") {
@@ -155,8 +155,19 @@ void Client::sendRequest( const std::string &buf ) {
         snprintf(buffer,sizeof(buffer),"*2\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",(int)cmd.size(),cmd.c_str(),
                                                           (int)key.size(),key.c_str());
         AuxiliaryFun(buffer);
-
-    } 
+    } else if(cmd == "zadd") {
+        str >> key;
+        assert(key.c_str() != NULL);
+        string key1,value;
+        str >> key1;
+        str >> value;
+        snprintf(buffer,sizeof(buffer),"*4\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n",
+                                                          (int)cmd.size(),cmd.c_str(),
+                                                          (int)key.size(),key.c_str(),
+                                                           (int)key1.size(),key1.c_str(),
+                                                           (int)value.size(),value.c_str());
+        AuxiliaryFun(buffer);
+    }
     else {
         std::cout << "The command entered is incorrect, please re-enter" << std::endl;
         return;

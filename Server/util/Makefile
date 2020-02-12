@@ -420,6 +420,33 @@ main.cc.s:
 	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/main.cc.s
 .PHONY : main.cc.s
 
+skiplist.o: skiplist.cc.o
+
+.PHONY : skiplist.o
+
+# target to build an object file
+skiplist.cc.o:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/skiplist.cc.o
+.PHONY : skiplist.cc.o
+
+skiplist.i: skiplist.cc.i
+
+.PHONY : skiplist.i
+
+# target to preprocess a source file
+skiplist.cc.i:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/skiplist.cc.i
+.PHONY : skiplist.cc.i
+
+skiplist.s: skiplist.cc.s
+
+.PHONY : skiplist.s
+
+# target to generate assembly for a file
+skiplist.cc.s:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/skiplist.cc.s
+.PHONY : skiplist.cc.s
+
 status.o: status.cc.o
 
 .PHONY : status.o
@@ -489,6 +516,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... skiplist.o"
+	@echo "... skiplist.i"
+	@echo "... skiplist.s"
 	@echo "... status.o"
 	@echo "... status.i"
 	@echo "... status.s"
