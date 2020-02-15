@@ -97,7 +97,7 @@ void Accept::handleWrite () {
                 std::cout << "More Date will be sent" << std::endl;
             }
         } else {
-            std::cout << "[Accept::handwrite]: " << __LINE__ << std::endl;
+            std::cout << "[Accept::handwrite]: " << __LINE__ << strerror(errno)<< std::endl;
         }
     } else {
         std::cout << "[Accept::handwrite]: Connection has been closed " << __LINE__ << std::endl; 

@@ -24,8 +24,8 @@ void Epoll::fillActiveChannel(int numEvents, ChannelList *activeChannelList) {
         Channel *channel = static_cast<Channel*>(events_[i].data.ptr);
         int sockfd = channel->getSockfd();
         ChannelMap::const_iterator it = channel_.find(sockfd);
-        // assert(it != channel_.end());
-        // assert(channel == it->second);
+        assert(it != channel_.end());
+        assert(channel == it->second);
         channel->setRevents(events_[i].events);
         activeChannelList->push_back(channel);
     }
@@ -58,6 +58,7 @@ void Epoll::updateChannel(Channel *channel) {
         int ret = ::epoll_ctl(epollfd_,EPOLL_CTL_MOD,channel->getSockfd(),&efd);
         std::cout << "update channel: " << strerror(errno) << std::endl;        
         assert(ret == 0);
+
         // if(channel->isNoneEvent())
         //     channelptr->setSockfd(-1);
     }

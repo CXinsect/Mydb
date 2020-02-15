@@ -1,5 +1,50 @@
 #include "Client.h"
-
+size_t Io::writen(int sockfd,char*buf,ssize_t count) {
+  assert(sockfd != -1);
+  assert(buf != NULL);
+  assert(count != 0);
+  char *bufp = (char*)buf;
+  size_t nleft = count;
+  int nwrite = 0;
+  while(nleft > 0) {
+    nwrite = write(sockfd,bufp,nleft);
+    if(nwrite < 0) {
+      if(errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+        continue;
+        return -1;
+    }
+    if(nwrite == 0) continue;
+    nleft -= nwrite;
+    bufp += nwrite;
+  }
+  return count - nleft;
+}
+size_t Io::readn(int sockfd,char*buf,ssize_t size) {
+  assert(sockfd != -1);
+  assert(buf != NULL);
+  assert(size != 0);
+  flags:
+    char *bufp = buf;
+    int nread = 0;
+    int count = 0;
+    while(1) {
+      nread = read(sockfd,bufp,size);
+      if(nread < 0) {
+        if(errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN) {
+          break;
+        }
+        return -1;
+      }
+      else if(nread == 0) {
+        std::cout << "Server is Over" << std::endl;
+        return count;
+      }
+      count += nread;
+    }
+  if(count == 0)
+    goto flags;
+  return count;
+}
 int Client::setNoOrBlocking (int sockfd) {
     int ret = ::fcntl(sockfd,F_GETFL);
     assert(ret != -1);

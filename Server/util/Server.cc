@@ -19,9 +19,6 @@ void Server::Init()
     cmdtable_.insert(make_pair("hget", std::bind(&Server::hgetCommand, this, _1)));
     cmdtable_.insert(make_pair("hgetall", std::bind(&Server::hgetallCommand, this, _1)));
     cmdtable_.insert(make_pair("zadd",std::bind(&Server::zaddCommand, this, _1)));
-    // cmdtable_.insert(make_pair("zcard",std::bind(&Server::zcardCommand, this, _1)));
-    // cmdtable_.insert(make_pair("zcount",std::bind(&Server::zcountCommand, this, _1)));
-    // cmdtable_.insert(make_pair("zrange",std::bind(&Server::zrangeCommand, this, _1)));
 }
 void Server::onConnection(const AcceptorPtr &conn)
 {
