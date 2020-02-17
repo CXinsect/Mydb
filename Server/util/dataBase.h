@@ -10,6 +10,7 @@
 
 using namespace std;
 using namespace Mydb;
+using namespace DataStructure;
 
 class DataBase
 {
@@ -42,7 +43,13 @@ public:
   int getKeySpaceStringSize() { return String_.size(); }
   int getKeySpaceHashSize() { return Hash_.size(); }
   int getKeySpaceListSize() { return List_.size(); }
-
+  void rdbLoad();
+  inline std::string InterceptString(const std::string& ptr, int pos1,int pos2) {
+    if (pos1 > pos2) std::swap(pos1, pos2);
+    int gap = pos2 - pos1;
+    std::string ret = ptr.substr(pos1, gap);
+    return ret;
+  }
 private:
   long long getTimestamp()
   {

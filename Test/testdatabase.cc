@@ -1,7 +1,7 @@
-#include "../Server/dataBase.cc"
+#include "../Server/util/Server.cc"
 
 int main (void) {
-    DataBase base(10);
+    Server
      base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","color","white",DefaultTime);
      base.addKeySpace(DataStructure::ObjHash,DataStructure::EncodingRaw,"dot","color","black",DefaultTime);
 

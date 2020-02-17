@@ -164,8 +164,8 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
   {
     if (type == DataStructure::ObjString)
     {
-        SMap::iterator sIter = sMap_.find(key);
-        if (sIter == sMap_.end())
+        auto sIter = String_.find(key);
+        if (sIter == String_.end())
         {
           ret = Status::NotFound("Not Found").ToString();
         }
@@ -293,5 +293,114 @@ bool DataBase::judgeKeySpaceExpiresTime(int type, const std::string &key)
       return true;
     else
       return false;
+  }
+}
+void DataBase::rdbLoad() {
+  char buf[2 * 1024] = {0};
+  std::string path = getcwd(buf, sizeof(buf));
+  path += "/1.rdb";
+  struct stat stat_;
+  int ret = ::stat(path.c_str(), &stat_);
+  if (ret < 0)
+  {
+    cout << strerror(errno) << endl;
+  }
+  // MmapFile mfile(static_cast<int>(stat_.st_size), path);
+
+  // mfile.MmapOpen();
+  std::ifstream in;
+  in.open(path, std::ios::in);
+  // if opening is successful
+  if (in.is_open()) {
+    while (!in.eof()) {
+      in.read(buf, sizeof(buf));
+    }
+    std::cout << "data in buffer: " << buf << std::endl;
+  }
+  in.close();
+
+  // std::string data(mfile.getFilePtr(), mfile.getFilePtr() + mfile.getFileSize());
+  string data = buf;
+  std::cout << "data: " << data << data.size() << std::endl;
+  int pos;
+  ret = data.find("FE");
+  pos = data.find('^',ret);
+  cout << pos << ret << endl;
+  int dbNum = atoi(InterceptString(data,ret+2,pos).c_str());
+  ret = data.find("FD");
+  assert(ret != -1);
+  int type = atoi(InterceptString(data,pos+1,ret).c_str());
+  cout << dbNum << type << endl;
+  pos = data.find('!',ret);
+  long long expireTime = atoi(InterceptString(data,ret+2,pos).c_str());
+  int end = data.find("EOF");
+  while (pos < end && ret < end)
+  {
+    if (type == ObjString)
+    {
+      ret = data.find('#',pos);
+      int mkLen = atoi(InterceptString(data, pos + 1, ret).c_str());
+      string key = data.substr(ret + 1, mkLen);
+      pos = data.find('!', ret);
+      ret = data.find('$', pos);
+      int valueLen = atoi(InterceptString(data, pos + 1, ret).c_str());
+      string value = data.substr(ret + 1, valueLen);
+      cout << "key : " << key << value << endl;
+      String_.insert(make_pair(key, value));
+      ret += 1 + valueLen;
+      continue;
+    }
+    if (type == ObjHash)
+    {
+      std::multimap<std::string, std::string> tmp;
+      ret = data.find('#',pos);
+      int mkLen = atoi(InterceptString(data, pos + 1, ret).c_str());
+      string key = data.substr(ret + 1, mkLen);
+      pos = data.find('!', ret);
+      // Skip hash size
+      ret = data.find('!', pos + 1);
+      int num = atoi(InterceptString(data,pos+1,ret).c_str());
+      int valueLen = 0;
+      while(num > 0) {
+        pos = data.find('#', ret);
+        int skeyLen = atoi(InterceptString(data, ret + 1, pos).c_str());
+        string skey = data.substr(pos + 1, skeyLen);
+        ret = data.find('!', pos);
+        pos = data.find('$', ret);
+        valueLen = atoi(InterceptString(data, ret + 1, pos).c_str());
+        string value = data.substr(pos + 1, valueLen);
+        tmp.insert(make_pair(skey, value));
+        num--;
+        cout << data << "--------------- pos " << pos  << " : " << end << endl;
+      }
+      pos += 1 + valueLen;
+
+      Hash_.insert(make_pair(key, tmp));
+      continue;
+    }
+    if (type == ObjList)
+    {
+      ret = data.find_first_of('#');
+      int mkLen = atoi(InterceptString(data, pos + 1, ret).c_str());
+      string key = data.substr(ret + 1, mkLen);
+      pos = data.find('!', ret);
+      ret = data.find('!', pos + 1);
+      int listSize = atoi(InterceptString(data, pos + 1, ret).c_str());
+      std::list<std::string> tmp;
+      int valueLen = 0;
+      while (listSize-- > 0)
+      {
+        pos = data.find('$', ret);
+        valueLen = atoi(InterceptString(data, ret + 1, pos).c_str());
+        string value = data.substr(pos + 1, valueLen);
+        tmp.push_back(value);
+        ret = data.find('!', pos);
+      }
+      if(ret == -1) break;
+      ret += 1 + valueLen;
+      List_.insert(make_pair(key, tmp));
+      continue;
+    }
+    std::cout << "Finally: " << data << std::endl;
   }
 }

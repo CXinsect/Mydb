@@ -1,11 +1,14 @@
 #include "Server.h"
 #include "dataBase.h"
 
+using namespace DataStructure;
+
 void Server::Init()
 {
     database_.push_back(shared_ptr<DataBase>(new DataBase()));
     dbSize_ = database_.size();
     dbIndex_ = database_.size() - 1;
+    database_[dbIndex_]->rdbLoad();
     //init command table
     cmdtable_.insert(make_pair("get", std::bind(&Server::getCommand, this, _1)));
     cmdtable_.insert(make_pair("set", std::bind(&Server::setCommand, this, _1)));
@@ -45,6 +48,7 @@ bool Server::CheckStorageConditions()
         lastsave_ = getTimestamp();
         return true;
     }
+    cout << "未过期" << endl;
     return false;
 }
 void Server::rdbSave()
@@ -91,8 +95,9 @@ void Server::rdbSave()
             cout << "文件打开失败" << endl;
             abort();
         }
+        string str;
         //保存头部信息
-        saveHead(out);
+        str = saveHead();
         for (int i = 0; i < database_.size(); i++)
         {
             if (!database_[i]->getKeySpaceStringObject().size() &&
@@ -102,58 +107,61 @@ void Server::rdbSave()
                 std::cout << "The Data is Empty" << std::endl;
                 return;
             }
-            saveSelectDb(out, i);
+            str += saveSelectDb(i);
             //如果字符串对象不为空便开始写入过程
             if (database_[i]->getKeySpaceStringObject().size() != 0)
             {
+                str += saveType(ObjString);
                 //首先判断字符串对象，实现对字符串对象的保存。
                 auto it = database_[i]->getKeySpaceStringObject().begin();
                 while (it != database_[i]->getKeySpaceStringObject().end())
                 {
-                    saveExpireTime(out, database_[i]->getKeySpaceExpiresTime(DataStructure::ObjString, it->first));
-                    saveType(out,DataStructure::ObjString);
-                    saveKey(out, DataStructure::EncodingString, it->first);
-                    saveValue(out, DataStructure::EncodingString, it->second);
+                    str += saveExpireTime(database_[i]->getKeySpaceExpiresTime(DataStructure::ObjString, it->first));
+                    str += saveKeyValue(it->first,it->second);
                     it++;
                 }
+                out.write(str.c_str(),str.size());
             }
             if (database_[i]->getKeySpaceHashObject().size() != 0)
             {
                 //保存哈希对象
+                str += saveType(ObjHash);
                 auto it = database_[i]->getKeySpaceHashObject().begin();
                 while (it != database_[i]->getKeySpaceHashObject().end())
                 {
-                    saveExpireTime(out,database_[i]->getKeySpaceExpiresTime(DataStructure::ObjHash,it->first));
-                    saveType(out,DataStructure::ObjHash);
-                    saveKey(out,DataStructure::EncodingString,it->first);     
+                    str += saveExpireTime(database_[i]->getKeySpaceExpiresTime(ObjHash,it->first));
                     auto iter = it->second.begin();
+                    string tmp = "!" + to_string(it->second.size());
                     while (iter != it->second.end())
                     {
-                        saveKey(out,DataStructure::EncodingDict,iter->first);     
-                        saveValue(out, DataStructure::EncodingDict, iter->second);
+                        tmp += saveKeyValue(iter->first,iter->second);
                         iter++;
                     }
+                    str += "!" + to_string(it->first.size()) + "#" + it->first.c_str() + tmp + "EOF";    
                     it++;
                 }
+                out.write(str.c_str(),str.size());
             }
             if (database_[i]->getKeySpaceListObject().size() != 0)
             {
                 //保存列表对象
+                str += saveType(ObjList);
                 memset(buf, 0, sizeof(buf));
                 auto it = database_[i]->getKeySpaceListObject().begin();
                 while (it != database_[i]->getKeySpaceListObject().end())
                 {   
-                    saveExpireTime(out,database_[i]->getKeySpaceExpiresTime(DataStructure::ObjList,it->first));
-                    saveType(out,DataStructure::ObjList);
-                    saveKey(out,DataStructure::EncodingString,it->first);
+                    str += saveExpireTime(database_[i]->getKeySpaceExpiresTime(ObjList,it->first));
                     auto iter = it->second.begin();
+                    string tmp = "!" + to_string(it->second.size());
                     while (iter != it->second.end())
                     {
-                        saveValue(out, DataStructure::EncodingLinkedList, *iter);
+                        tmp += "!" + to_string(iter->size()) + "$" + iter->c_str();
                         iter++;
                     }
+                    str += "!" + to_string(it->first.size()) + "#" + it->first.c_str() + tmp + "EOF";
                     it++;
                 }
+                out.write(str.c_str(),str.size());
             }
             //Signal the parent process
             kill(getppid(), SIGUSR1);
@@ -192,7 +200,7 @@ const std::string Server::getCommand(const vector<string> &argv)
         return Status::IOError("Empty Content").ToString();
     }
     else
-        return res;
+        return res+"\r\n";
 }
 const std::string Server::setCommand(const vector<string> &argv)
 {

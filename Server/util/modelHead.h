@@ -38,10 +38,10 @@ using namespace std;
 namespace DataStructure
 {
 //对象
-const int ObjString = 0;
-const int ObjHash = 1;
-const int ObjList = 2;
-const int ObjZset = 3;
+const short ObjString = 0;
+const short ObjHash = 1;
+const short ObjList = 2;
+const short ObjZset = 3;
 //编码
 const int EncodingString = 0;
 const int EncodingDict = 1;

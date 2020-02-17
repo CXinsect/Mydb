@@ -9,9 +9,9 @@
 using namespace Mydb;
 using namespace std;
 
-const int OptionSelectdb = 254;
-const int OptionEof = 255;
-const int OptionExpireTime = 252;
+const string OptionSelectdb = "FE";
+const string OptionExpireTime = "FD";
+const string OptionEof = "EOF";
 
 class DataBase;
 class Server {
@@ -59,50 +59,24 @@ public:
              assert(gettimeofday(&tv, NULL) != -1);
              return tv.tv_sec;
          }
-         void saveHead(ofstream& out) {
+         string saveHead() {
              string tmp = "REDIS0004";
-             out.write(tmp.c_str(),tmp.size());
+             return tmp;
          }
-         void saveType(ofstream& out,unsigned char data) {
-             out.write(static_cast<char*>(static_cast<void*>(&data)),1);
+         string saveSelectDb(int index) {
+             return OptionSelectdb + to_string(index);
          }
-         void saveLength(ofstream& out,int len) {
-            unsigned char buf[2];
-            if (len < (1<<6)) {
-                //保存6位数据
-                buf[0] = len & 0xFF;
-                out.write(static_cast<char*>(static_cast<void*>(buf)),1);
-            } else {
-                cout << "The Length is Too Long [abort]" << endl;
-                abort();
-            }
+         string saveExpireTime(long long Time) {
+             return OptionExpireTime + to_string(Time);
          }
-         void saveExpireTime(ofstream& out,long long Time) {
-             char buf[16];
-             sprintf(buf,"%lld",Time/1000);
-             saveType(out,OptionExpireTime);
-             saveLength(out,strlen(buf));
-             out.write(buf,strlen(buf));
+         string saveType(short type) {
+             return string ("^" + to_string(type));
          }
-         void saveSelectDb(ofstream& out,int index) {
-             char buf[16];
-             sprintf(buf,"%d",index);
-             saveType(out,OptionSelectdb);
-             saveLength(out,strlen(buf));
-             out.write(buf,strlen(buf));
-         }
-         void saveKey(ofstream& out,unsigned char type,const string key) {
-            saveType(out,type);
-            saveLength(out,key.size());
-            out.write(key.c_str(),key.size());
-         }
-         void saveValue(ofstream& out,unsigned char encoding,const string value) {
-            saveType(out,encoding);            
-            saveLength(out,value.size());
-            out.write(value.c_str(),value.size());
-         }
-         void saveTail(ofstream& out) {
-             saveType(out,OptionEof);
+         string saveKeyValue(const string& key,const string& value) {
+            char buf[1024];
+            sprintf(buf,"!%d#%s!%d$%s",(int)key.size(),key.c_str(),
+                                                    (int)value.size(),value.c_str());
+            return string(buf);
          }
 
     public:

@@ -119,9 +119,3 @@ struct sockaddr_in sockets::getPeerAddr(int sockfd) {
         myError("getsockname",__LINE__);
     return peerAddr;
 }
-bool sockets::isSelfConnection(int sockfd) {
-    struct sockaddr_in localaddr = getLocalAddr(sockfd);
-    struct sockaddr_in peeraddr = getPeerAddr(sockfd);
-    return localaddr.sin_port == peeraddr.sin_port &&
-           localaddr.sin_addr.s_addr == peeraddr.sin_addr.s_addr;         
-}
