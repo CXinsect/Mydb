@@ -1,0 +1,3 @@
+/home/insect/code/MeetingCode/Database/Server/util/CMakeFiles/rebuild_cache.dir
+/home/insect/code/MeetingCode/Database/Server/util/CMakeFiles/Server.dir
+/home/insect/code/MeetingCode/Database/Server/util/CMakeFiles/edit_cache.dir

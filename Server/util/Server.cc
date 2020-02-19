@@ -35,7 +35,7 @@ void Server::onMessage(const AcceptorPtr &conn, Buffer *buf, ssize_t len)
 }
 void Server::parentHandle(int sig)
 {
-    std::cout << "parent process" << std::endl;
+    std::cout << "parent process-----------------" << std::endl;
 }
 bool Server::CheckStorageConditions()
 {
@@ -53,35 +53,12 @@ bool Server::CheckStorageConditions()
 }
 void Server::rdbSave()
 {
-    struct sigaction act, act1;
-    sigset_t set;
-    sigemptyset(&set);
-    sigaddset(&set, SIGUSR1);
-    sigprocmask(SIG_BLOCK, &set, NULL);
     pid_t pid = fork();
-    if (pid > 0)
-    {
-        //Receive signals from child processes
-        do
-        {
-            sigemptyset(&act.sa_mask);
-            act.sa_flags = 0;
-            act.sa_handler = Server::parentHandle;
-            int ret = sigaction(SIGUSR1, &act, NULL);
-            assert(ret != -1);
-            ret = sigprocmask(SIG_UNBLOCK,&set,NULL);
-            assert(ret == 0);
-            sigStop_ = true;
-        } while (!sigStop_);
-        //wait for child process
-        while (waitpid(-1, NULL, WNOHANG) != -1)
-            ;
+    if (pid > 0){
     }
-
     else if (pid == 0)
     {
         std::cout << "hello child" << std::endl;
-        cout << strerror(errno) << endl;
         char buf[1024] = {0};
         std::string tmp = getcwd(buf, sizeof(buf));
         assert(tmp.c_str() != NULL);
@@ -120,6 +97,7 @@ void Server::rdbSave()
                     str += saveKeyValue(it->first,it->second);
                     it++;
                 }
+                str += "EOF";
                 out.write(str.c_str(),str.size());
             }
             if (database_[i]->getKeySpaceHashObject().size() != 0)
@@ -163,9 +141,8 @@ void Server::rdbSave()
                 }
                 out.write(str.c_str(),str.size());
             }
-            //Signal the parent process
-            kill(getppid(), SIGUSR1);
-            return;
+            out.close();
+            exit(0);
         }
     }
     else

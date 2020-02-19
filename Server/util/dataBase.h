@@ -7,6 +7,7 @@
 #include "LRU.h"
 #include "skiplist.h"
 #include <unordered_map>
+#include <sys/mman.h>
 
 using namespace std;
 using namespace Mydb;

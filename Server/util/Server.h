@@ -25,6 +25,9 @@ class Server {
             accept_->listen();
             Init();
         }
+        ~Server() {
+            while(waitpid(-1,NULL,WNOHANG) != -1);
+        }
     private:
         const string getCommand(const vector<string>&);
         const string setCommand(const vector<string>&);

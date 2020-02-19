@@ -55,7 +55,7 @@ const int WriteEvent = 2;
 //网络配置
 const int Port = 8888;
 const std::string Ip = "127.0.0.1";
-const int saveTime = 60 * 60;
+const int saveTime = 1;
 const std::string SpareTire = "SPACE";
 
 } // namespace DataStructure

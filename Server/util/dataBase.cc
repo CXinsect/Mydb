@@ -177,8 +177,8 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
     }
     else if (type == DataStructure::ObjHash)
     {
-      HMap::iterator hIter = hMap_.find(key);
-      if (hIter == hMap_.end())
+      auto hIter = Hash_.find(key);
+      if (hIter == Hash_.end())
       {
         std::cout << "Not Found" << std::endl;
         cout << "hash__key: " << key << endl;
@@ -211,12 +211,11 @@ std::string DataBase::getKeySpace(int type, const std::string &key)
     }
     else if (type == DataStructure::ObjList)
     {
-      LMap::iterator lIter = lMap_.find(key);
-      if (lIter == lMap_.end())
+      auto lIter = List_.find(key);
+      if (lIter == List_.end())
       {
         std::cout << "Not Found" << std::endl;
         cout << "hash__key: " << key << endl;
-
         ret = Status::NotFound("Not Found").ToString();
       }
       else
@@ -299,28 +298,22 @@ void DataBase::rdbLoad() {
   char buf[2 * 1024] = {0};
   std::string path = getcwd(buf, sizeof(buf));
   path += "/1.rdb";
+  int fd = open(path.c_str(),O_CREAT | O_RDWR,0644);
+  cout << strerror(errno) << endl;
+  assert(fd != -1);
   struct stat stat_;
   int ret = ::stat(path.c_str(), &stat_);
-  if (ret < 0)
-  {
-    cout << strerror(errno) << endl;
+  assert(ret != -1);
+  if(stat_.st_size == 0) return;
+  char* addr = static_cast<char*>(mmap(NULL,stat_.st_size,PROT_READ,MAP_SHARED,fd,0));
+  if(addr == MAP_FAILED) {
+    cout << "Mmap Error" << endl;
+    abort();
   }
-  // MmapFile mfile(static_cast<int>(stat_.st_size), path);
-
-  // mfile.MmapOpen();
-  std::ifstream in;
-  in.open(path, std::ios::in);
-  // if opening is successful
-  if (in.is_open()) {
-    while (!in.eof()) {
-      in.read(buf, sizeof(buf));
-    }
-    std::cout << "data in buffer: " << buf << std::endl;
-  }
-  in.close();
-
-  // std::string data(mfile.getFilePtr(), mfile.getFilePtr() + mfile.getFileSize());
-  string data = buf;
+  close(fd);
+  if(strlen(buf) == 0) return;
+  string data(addr,addr+stat_.st_size);
+  assert(munmap(addr,stat_.st_size) != -1);
   std::cout << "data: " << data << data.size() << std::endl;
   int pos;
   ret = data.find("FE");
@@ -345,7 +338,6 @@ void DataBase::rdbLoad() {
       ret = data.find('$', pos);
       int valueLen = atoi(InterceptString(data, pos + 1, ret).c_str());
       string value = data.substr(ret + 1, valueLen);
-      cout << "key : " << key << value << endl;
       String_.insert(make_pair(key, value));
       ret += 1 + valueLen;
       continue;
@@ -371,7 +363,6 @@ void DataBase::rdbLoad() {
         string value = data.substr(pos + 1, valueLen);
         tmp.insert(make_pair(skey, value));
         num--;
-        cout << data << "--------------- pos " << pos  << " : " << end << endl;
       }
       pos += 1 + valueLen;
 
