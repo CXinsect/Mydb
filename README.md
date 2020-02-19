@@ -79,5 +79,3 @@ int main (int argc,char* argv[]) {
    ![](https://github.com/CXinsect/Mydb/blob/master/images/100000.png)
   - 执行1000000条命令返回的结果
    ![](https://github.com/CXinsect/Mydb/blob/master/images/1000000.png)
-- 绘制成图表
- ![](https://github.com/CXinsect/Mydb/blob/master/images/database.png)
