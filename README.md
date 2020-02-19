@@ -72,13 +72,12 @@ int main (int argc,char* argv[]) {
 ### 运行结果
 - 分别执行5000\10000\100000\1000000条命令计算返回的时间
   - 执行5000条命令返回的结果
- ![](https://github.com/CXinsect/Mydb/blob/master/images/5000.png)
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/5000.png)
   - 执行10000条命令返回的结果
- ![](https://github.com/CXinsect/Mydb/blob/master/images/10000.png)
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/10000.png)
   - 执行100000条命令返回的结果
- ![](https://github.com/CXinsect/Mydb/blob/master/images/100000.png)
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/100000.png)
   - 执行1000000条命令返回的结果
- ![](https://github.com/CXinsect/Mydb/blob/master/images/1000000.png)
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/1000000.png)
 - 绘制成图表
-![](https://github.com/CXinsect/Mydb/blob/master/images/database.png)
-
+ ![](https://github.com/CXinsect/Mydb/blob/master/images/database.png)
