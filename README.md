@@ -6,10 +6,12 @@
  
 ### 特点
  - 使用**哈希表、链表、跳跃表**作为数据对象底层的数据结构
- - 使用Epoll多路复用机制管理不同类型的套接字事件，同时通过回调函数作出相应响应
+ - 使用单线程Reactor＋非阻塞IO设计，同时通过回调函数作出相应响应
  - 利用智能指针技术管理对象。避免了内存泄露和空闲指针
  - 使用LRU算法、惰性删除和定时删除策略实现对不满足要求的键值对进行管理
  - 使用分散读**readv**，减少了当输入缓冲区满时服务器触发回调的次数，进一步减少了系统调用。
+ - 使用mmap读取文件。提高IO效率
+ 
  
 
 ### 目录说明
@@ -67,6 +69,13 @@ int main (int argc,char* argv[]) {
     std::cout << "get time costs: " << (double) (endTime1- startTime1)/CLOCKS_PER_SEC << std::endl;
 }
 ```
- - 分别执行5000\10000\100000\1000000条命令计算返回的时间
- ![](https://github.com/CXinsect/Mydb/blob/master/images/database.png)
-
+### 运行结果
+- 分别执行5000\10000\100000\1000000条命令计算返回的时间
+  - 执行5000条命令返回的结果
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/5000.png)
+  - 执行10000条命令返回的结果
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/10000.png)
+  - 执行100000条命令返回的结果
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/100000.png)
+  - 执行1000000条命令返回的结果
+   ![](https://github.com/CXinsect/Mydb/blob/master/images/1000000.png)
