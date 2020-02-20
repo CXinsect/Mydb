@@ -1,4 +1,4 @@
-#include "../Server/util/modelHead.h"
+#include "../Server/util/ModelHead.h"
 #include "../Client/Client.cc"
 #include <sstream>
 

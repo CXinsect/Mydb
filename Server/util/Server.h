@@ -3,8 +3,9 @@
 
 #include "Accept.h"
 #include "EventLoop.h"
-#include "status.h"
+#include "Status.h"
 #include <unordered_map>
+#include <utility>
 
 using namespace Mydb;
 using namespace std;
@@ -29,21 +30,18 @@ class Server {
             while(waitpid(-1,NULL,WNOHANG) != -1);
         }
     private:
-        const string getCommand(const vector<string>&);
-        const string setCommand(const vector<string>&);
-        const string bgsaveCommand(const vector<string>&);
-        const string delCommand(const vector<string>&);
-        const string selectCommand(const vector<string>&);
-        const string expireTimeCommand(const vector<string>&);
-        const string rpushCommand(const vector<string>&);
-        const string rpopCommand(const vector<string>&);
-        const string hsetCommand(const vector<string>&);
-        const string hgetCommand(const vector<string>&);
-        const string hgetallCommand(const vector<string>&);
-        const string zaddCommand(const vector<string>&);
-        // const string zcardCommand(const vector<string>&);
-        // const string zcountCommand(const vector<string>&);
-        // const string zrangeCommand(const vector<string>&);
+        const string getCommand(vector<string>&&);
+        const string setCommand(vector<string>&&);
+        const string bgsaveCommand(vector<string>&&);
+        const string delCommand(vector<string>&&);
+        const string selectCommand(vector<string>&&);
+        const string expireTimeCommand(vector<string>&&);
+        const string rpushCommand(vector<string>&&);
+        const string rpopCommand(vector<string>&&);
+        const string hsetCommand(vector<string>&&);
+        const string hgetCommand(vector<string>&&);
+        const string hgetallCommand(vector<string>&&);
+        const string zaddCommand(vector<string>&&);
         static void endDataBase(DataBase *) { ; }
     public:
         void Init() ;
@@ -92,7 +90,7 @@ public:
     private:
         EventLoop *loop_;
         shared_ptr<Accept> accept_;
-        unordered_map <string,function<string(const vector<string>&)>> cmdtable_;
+        unordered_map <string,function<string(vector<string>&&)>> cmdtable_;
         vector <shared_ptr<DataBase>> database_;        
         int dbIndex_  = -1;
         int dbSize_;

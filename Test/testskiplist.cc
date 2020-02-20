@@ -1,4 +1,4 @@
-#include "../Server/util/skiplist.h"
+#include "../Server/util/SkipList.h"
 
 int main() {
     srand(time(NULL));

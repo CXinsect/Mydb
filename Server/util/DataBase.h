@@ -2,27 +2,30 @@
 #ifndef _DATABASE_H_
 #define _DATABASE_H_
 
-#include "modelHead.h"
-#include "status.h"
-#include "LRU.h"
-#include "skiplist.h"
-#include <unordered_map>
 #include <sys/mman.h>
+
+#include <ext/pool_allocator.h>
+#include <unordered_map>
+
+#include "LRU.h"
+#include "ModelHead.h"
+#include "SkipList.h"
+#include "Status.h"
 
 using namespace std;
 using namespace Mydb;
-using namespace DataStructure;
+using namespace dataStructure;
 
-class DataBase
-{
-public:
-  DataBase() : skip_(new skiplist(8,0.25)) {};
+class DataBase {
+ public:
+  DataBase() : skip_(new skiplist(8, 0.25)){};
   ~DataBase() {}
 
-public:
+ public:
   typedef unordered_map<std::string, std::string> String;
-  typedef unordered_map<std::string, std::multimap<std::string, std::string>> Hash;
-  typedef unordered_map<std::string, std::list<std::string>> List;
+  typedef unordered_map<std::string, std::multimap<std::string, std::string>>
+      Hash;
+  typedef unordered_map<std::string, std::list<string>> List;
   const long long DefaultTime = -2038;
 
   bool addKeySpace(int type, int encoding, const std::string &key,
@@ -37,7 +40,7 @@ public:
   void deleteKeySpaceExpireTime(int type, const std::string &key);
   long long RemainingSurvivalTime(int type, const std::string &key);
 
-public:
+ public:
   String &getKeySpaceStringObject() { return String_; }
   Hash &getKeySpaceHashObject() { return Hash_; }
   List &getKeySpaceListObject() { return List_; }
@@ -45,21 +48,22 @@ public:
   int getKeySpaceHashSize() { return Hash_.size(); }
   int getKeySpaceListSize() { return List_.size(); }
   void rdbLoad();
-  inline std::string InterceptString(const std::string& ptr, int pos1,int pos2) {
+  inline std::string InterceptString(const std::string &ptr, int pos1,
+                                     int pos2) {
     if (pos1 > pos2) std::swap(pos1, pos2);
     int gap = pos2 - pos1;
     std::string ret = ptr.substr(pos1, gap);
     return ret;
   }
-private:
-  long long getTimestamp()
-  {
+
+ private:
+  long long getTimestamp() {
     struct timeval tv;
     assert(gettimeofday(&tv, NULL) != -1);
     return tv.tv_sec;
   }
 
-private:
+ private:
   int size = -1;
   //键空间中的实际对象
   String String_;
@@ -67,8 +71,7 @@ private:
   List List_;
   shared_ptr<skiplist> skip_;
 
-
-private:
+ private:
   //过期时间
   typedef unordered_map<string, long long> SMap;
   typedef unordered_map<string, long long> HMap;

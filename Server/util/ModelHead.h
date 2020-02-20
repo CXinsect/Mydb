@@ -13,30 +13,30 @@
 #include <sys/epoll.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 #include <sys/uio.h>
-#include <unistd.h>
+#include <sys/wait.h>
 #include <time.h>
+#include <unistd.h>
+
+#include <algorithm>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <list>
 #include <map>
 #include <memory>
-#include <string>
-#include <vector>
-#include <fstream>
 #include <sstream>
-#include <algorithm>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 using namespace ::std::placeholders;
 using namespace std;
 
-namespace DataStructure
-{
+namespace dataStructure {
 //对象
 const short ObjString = 0;
 const short ObjHash = 1;
@@ -58,7 +58,7 @@ const std::string Ip = "127.0.0.1";
 const int saveTime = 1;
 const std::string SpareTire = "SPACE";
 
-} // namespace DataStructure
+}  // namespace DataStructure
 
 const long long DefaultTime = 2038;
 

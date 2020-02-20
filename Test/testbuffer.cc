@@ -1,8 +1,8 @@
 #include <iostream>
-#include "model.h"
-#include "../Server/EventLoop.cc"
-#include "../Server/Channel.cc"
-#include "../Server/Accept.cc"
+#include "../Server/util/ModelHead.h"
+#include "../Server/util/EventLoop.cc"
+#include "../Server/util/Channel.cc"
+#include "../Server/util/Accept.cc"
 
 void onConnection(const AcceptorPtr& conn) {
     std::cout << "New Connection: " << conn->getSocketInfo() << std::endl;
