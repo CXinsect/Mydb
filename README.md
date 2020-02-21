@@ -11,7 +11,7 @@
  - 使用LRU算法、惰性删除和定时删除策略实现对不满足要求的键值对进行管理
  - 使用分散读**readv**，减少了当输入缓冲区满时服务器触发回调的次数，进一步减少了系统调用。
  - 使用mmap读取文件。提高IO效率
- 
+ - 使用了扩展的内存分配器，减少了malloc的额外开销
  
 
 ### 目录说明
@@ -31,8 +31,30 @@ Test|客户端测试文件
   ./Server
 ```
 
-### 性能测试
-测试代码：
+### 测试
+
+#### 基本功能
+```
+#include "../Client/Client.h"
+#include <ctime>
+int main (int argc,char* argv[]) {
+    Client client(6379,"127.0.0.1",600);
+    client.Connect();
+    client.sendRequest("set name test");
+    client.sendRequest("get name");
+    client.sendRequest("hset tree color black");
+    client.sendRequest("hset tree height high");
+    client.sendRequest("hget tree");
+    client.sendRequest("rpush list didi jiejie");
+    client.sendRequest("rpop list");
+    client.sendRequest("zadd zset 1 apple 2 cherry");
+    client.sendRequest("zcount zset 0 3");
+}
+```
+测试结果
+![](https://github.com/CXinsect/Mydb/blob/master/images/component.png)
+
+#### 响应时间
 ```
 #include "../Client/Client.h"
 #include <ctime>
