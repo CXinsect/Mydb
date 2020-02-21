@@ -30,6 +30,8 @@ void Server::Init() {
       make_pair("hgetall", std::bind(&Server::hgetallCommand, this, _1)));
   cmdtable_.insert(
       make_pair("zadd", std::bind(&Server::zaddCommand, this, _1)));
+  cmdtable_.insert(
+      make_pair("zcount", std::bind(&Server::zcountCommand, this, _1)));
 }
 void Server::onConnection(const AcceptorPtr &conn) {
   std::cout << "New Connection" << std::endl;
@@ -160,7 +162,7 @@ const std::string Server::getCommand(vector<string> &&argv) {
   if (res.c_str() == NULL) {
     return Status::ioError("Empty Content").toString();
   } else
-    return res + "\r\n";
+    return res;
 }
 const std::string Server::setCommand(vector<string> &&argv) {
   if (argv.size() != 3) return Status::ioError("Wrong parameter").toString();
@@ -273,9 +275,16 @@ const std::string Server::rpopCommand(vector<string> &&argv) {
   if (argv.size() != 2) return Status::ioError("Wrong parameter").toString();
   std::string res = database_[dbIndex_]->delListObject(argv[1]);
   if (res.size() >= 0)
-    return res;
+    return "+" + res;
   else
     return Status::ioError("Rpop Error").toString();
+}
+const string Server::zcountCommand (vector<string>&& argv) {
+  assert(dbIndex_ >= 0);
+  rangeSpec range((double)atoi(argv[2].c_str()),(double)atoi(argv[3].c_str()));
+  if(argv.size() != 4) return Status::ioError("wrong parameter").toString();
+  string ret = database_[dbIndex_]->getSkiplistCount(range);
+  return "+" + ret;
 }
 std::string Server::commandRequest(Buffer *buf) {
   std::string res = std::string();
@@ -297,7 +306,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       keylen_ = atoi(org.substr(pos + 1, ret).c_str());
       key_ = org.substr(ret + dst.size(), keylen_);
-      vector<string> v = {cmd_,key_};
+      vector<string> v = {cmd_, key_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "set") {
@@ -313,7 +322,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
       value_ = org.substr(ret + dst.size(), valuelen_);
-      vector<string> v = {cmd_,key_,value_};
+      vector<string> v = {cmd_, key_, value_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "bgsave") {
@@ -333,7 +342,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       keylen_ = atoi(org.substr(pos + 1, ret).c_str());
       key_ = org.substr(ret + dst.size(), keylen_);
-      vector<string> v = {cmd_,key_};
+      vector<string> v = {cmd_, key_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "select") {
@@ -341,12 +350,11 @@ std::string Server::commandRequest(Buffer *buf) {
     if (it == cmdtable_.end())
       res = Status::notFound("Not Found This Command select").toString();
     else {
-      
       pos = org.find('$', ret);
       ret = org.find(dst.c_str(), pos, 2);
       keylen_ = atoi(org.substr(pos + 1, ret).c_str());
       key_ = org.substr(ret + dst.size(), keylen_);
-      vector<string> v = {cmd_,key_};
+      vector<string> v = {cmd_, key_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "expire") {
@@ -362,7 +370,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
       value_ = org.substr(ret + dst.size(), valuelen_);
-      vector<string> v = {cmd_,key_,value_};
+      vector<string> v = {cmd_, key_, value_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "hset") {
@@ -382,7 +390,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
       value_ = org.substr(ret + dst.size(), valuelen_);
-      vector<string> v = {cmd_,key_,skey_,value_};
+      vector<string> v = {cmd_, key_, skey_, value_};
       std::cout << "value: " << value_ << "size: " << value_.size()
                 << std::endl;
       res = it->second(std::move(v));
@@ -396,7 +404,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       keylen_ = atoi(org.substr(pos + 1, ret).c_str());
       key_ = org.substr(ret + dst.size(), keylen_);
-      vector<string> v = {cmd_,key_};      
+      vector<string> v = {cmd_, key_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "rpop") {
@@ -408,7 +416,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       keylen_ = atoi(org.substr(pos + 1, ret).c_str());
       key_ = org.substr(ret + dst.size(), keylen_);
-      vector<string> v = {cmd_,key_};      
+      vector<string> v = {cmd_, key_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "rpush") {
@@ -424,7 +432,7 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
       value_ = org.substr(ret + dst.size(), valuelen_);
-      vector<string> v = {cmd_,key_,value_};
+      vector<string> v = {cmd_, key_, value_};
       res = it->second(std::move(v));
     }
   } else if (cmd_ == "hgetall") {
@@ -451,7 +459,27 @@ std::string Server::commandRequest(Buffer *buf) {
       ret = org.find(dst.c_str(), pos, 2);
       valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
       value_ = org.substr(ret + dst.size(), valuelen_);
-      vector<string> v = {cmd_,key_,skey_,value_};
+      vector<string> v = {cmd_, key_, skey_, value_};
+      res = it->second(std::move(v));
+    }
+  } else if (cmd_ == "zcount") {
+    auto it = cmdtable_.find(cmd_);
+    if (it == cmdtable_.end())
+      res = Status::notFound("Not Found This Command rpush").toString();
+    else {
+      pos = org.find('$', ret);
+      ret = org.find(dst.c_str(), pos, 2);
+      keylen_ = atoi(org.substr(pos + 1, ret).c_str());
+      key_ = org.substr(ret + dst.size(), keylen_);
+      pos = org.find('$', ret);
+      ret = org.find(dst.c_str(), pos, 2);
+      skeylen_ = atoi(org.substr(pos + 1, ret).c_str());
+      skey_ = org.substr(ret + dst.size(), skeylen_);
+      pos = org.find('$', ret);
+      ret = org.find(dst.c_str(), pos, 2);
+      valuelen_ = atoi(org.substr(pos + 1, ret).c_str());
+      value_ = org.substr(ret + dst.size(), valuelen_);
+      vector<string> v = {cmd_, key_, skey_, value_};
       res = it->second(std::move(v));
     }
   } else {

@@ -3,9 +3,8 @@
 #define _DATABASE_H_
 
 #include <sys/mman.h>
-
-#include <ext/pool_allocator.h>
 #include <unordered_map>
+#include <ext/pool_allocator.h>
 
 #include "LRU.h"
 #include "ModelHead.h"
@@ -16,16 +15,22 @@ using namespace std;
 using namespace Mydb;
 using namespace dataStructure;
 
+template <typename Key,typename T>
+using stringPool = unordered_map<Key,T,std::hash<Key>,std::equal_to<Key>,__gnu_cxx::__pool_alloc<pair<const Key,T>>>;
+template <typename Key,typename T>
+using mutiMapPool = multimap<Key,T,less<Key>,__gnu_cxx::__pool_alloc<pair<const Key,T>>>;
+template <typename T>
+using listPool = list<T,__gnu_cxx::__pool_alloc<T>>;
+
 class DataBase {
  public:
   DataBase() : skip_(new skiplist(8, 0.25)){};
   ~DataBase() {}
 
  public:
-  typedef unordered_map<std::string, std::string> String;
-  typedef unordered_map<std::string, std::multimap<std::string, std::string>>
-      Hash;
-  typedef unordered_map<std::string, std::list<string>> List;
+  typedef stringPool<string,string> String;
+  typedef stringPool<string,mutiMapPool<string,string>> Hash;
+  typedef stringPool<string,listPool<string>> List;
   const long long DefaultTime = -2038;
 
   bool addKeySpace(int type, int encoding, const std::string &key,
@@ -34,7 +39,7 @@ class DataBase {
   bool delKeySpace(int type, const std::string &key);
   const std::string delListObject(const std::string &key);
   std::string getKeySpace(int type, const std::string &key);
-
+  const string getSkiplistCount(rangeSpec&);
   long long getKeySpaceExpiresTime(int type, const std::string &key);
   bool judgeKeySpaceExpiresTime(int type, const std::string &key);
   void deleteKeySpaceExpireTime(int type, const std::string &key);
@@ -73,16 +78,17 @@ class DataBase {
 
  private:
   //过期时间
-  typedef unordered_map<string, long long> SMap;
-  typedef unordered_map<string, long long> HMap;
-  typedef unordered_map<string, long long> LMap;
+  typedef stringPool<string,long long> SMap;
+  typedef stringPool<string,long long> HMap;
+  typedef stringPool<string,long long> LMap;
+
 
   SMap sMap_;
   HMap hMap_;
   LMap lMap_;
 
   LRUCache<string, string> stringLru_;
-  LRUCache<string, multimap<string, string>> hashLru_;
-  LRUCache<string, list<string>> listLRu_;
+  LRUCache<string,mutiMapPool<string,string>> hashLru_;
+  LRUCache<string,listPool<string>> listLRu_;
 };
 #endif

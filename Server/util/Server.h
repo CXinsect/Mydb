@@ -42,6 +42,7 @@ class Server {
         const string hgetCommand(vector<string>&&);
         const string hgetallCommand(vector<string>&&);
         const string zaddCommand(vector<string>&&);
+        const string zcountCommand(vector<string>&&);
         static void endDataBase(DataBase *) { ; }
     public:
         void Init() ;

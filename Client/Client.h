@@ -32,7 +32,6 @@ class Client {
                 temp = temp.substr(0,pos);
                 if(!strcmp(temp.c_str(),"quit"))
                     break;
-                std::cout << "test" << std::endl;
                 const std::string tmp = buf;
                 sendRequest(tmp);
                 std::cout << "Input quit to Stop" << std::endl;
@@ -60,7 +59,9 @@ class Client {
             // ret = Io::readn(confd_,buffer,1024);
             ::read(confd_,buffer,1024);
             assert(ret != -1);
-            std::cout << "Response: " << buffer+1;
+            int n = strlen(buffer);
+            buffer[n+1] = 0;
+            std::cout << "Response: " << buffer+1 << endl;
         }
     private:
         int port_;

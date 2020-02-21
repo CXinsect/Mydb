@@ -4,7 +4,7 @@ namespace Mydb {
 
 std::string Status::toString() {
   if (str_ == "" && str_ == "") {
-    return "+Ok\r\n";
+    return "+Ok";
   } else {
     char tmp[30];
     const char* type;

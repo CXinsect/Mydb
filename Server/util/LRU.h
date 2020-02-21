@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <ext/pool_allocator.h>
 
 using namespace std;
 template <typename T1, typename T2>
@@ -95,7 +96,7 @@ class LRUCache {
   }
 
  private:
-  unordered_map<T1, LinkedNode<T1, T2>*> cache;
+  unordered_map<T1, LinkedNode<T1, T2>*,std::hash<T1>,std::equal_to<T1>,__gnu_cxx::__pool_alloc<pair<const T1,LinkedNode<T1, T2>*>>> cache;
   int count;
   int capicaty;
   LinkedNode<T1, T2>*head, *tail;

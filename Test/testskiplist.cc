@@ -13,7 +13,7 @@ int main() {
     cout << s.getNodeValue(s2.size()) << endl;
     cout << "Rank" << s.getNodeRank(s3.size(),s3);
     cout << "Length: " << s.getLength() << endl;
-    rangeSpec c(3,5);
+    rangeSpec c(2,5);
     cout << "RangeLength: " << s.getCountRange(c) << endl;
     auto v = s.getNodeRange(c);
     for(auto& i : v) {

@@ -20,17 +20,17 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
   } else if (type == dataStructure::ObjHash) {
     HMap::iterator Hiter = hMap_.find(key);
     if (Hiter == hMap_.end()) {
-      std::multimap<std::string, std::string> tmp;
+      mutiMapPool<string,string> tmp;
       tmp.insert(make_pair(value, value1));
       Hash_.insert(make_pair(key, tmp));
       hMap_.insert(make_pair(key, tempTime));
       hashLru_.set(key, tmp);
       cout << "hash_key::::" << key << endl;
     } else {
-      std::multimap<std::string, std::string> tmp;
+      // std::multimap<std::string, std::string> tmp;
+      mutiMapPool<string,string> tmp;
       Hash::iterator it = Hash_.find(key);
-      std::multimap<std::string, std::string>::iterator iter =
-          it->second.begin();
+      auto iter = it->second.begin();
       while (iter != it->second.end()) {
         tmp.insert(make_pair(iter->first, iter->second));
         iter++;
@@ -47,7 +47,8 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
   } else if (type == dataStructure::ObjList) {
     LMap::iterator lIter = lMap_.find(key);
     if (lIter == lMap_.end()) {
-      std::list<std::string> tmp;
+      // std::list<std::string> tmp;
+      listPool<string> tmp;
       tmp.push_back(value);
       List_.insert(make_pair(key, tmp));
       lMap_.insert(make_pair(key, tempTime));
@@ -56,7 +57,8 @@ bool DataBase::addKeySpace(int type, int encoding, const std::string &key,
       //更新list的值
       auto it = List_.find(key);
       std::list<std::string>::iterator iter = it->second.begin();
-      std::list<std::string> tmp;
+      // std::list<std::string> tmp;
+      listPool<string> tmp;
       while (iter != it->second.end()) {
         tmp.push_back(*iter);
         iter++;
@@ -180,7 +182,9 @@ std::string DataBase::getKeySpace(int type, const std::string &key) {
   }
   return ret;
 }
-
+const string DataBase::getSkiplistCount(rangeSpec& range) {
+  return to_string(skip_->getCountRange(range));
+}
 long long DataBase::getKeySpaceExpiresTime(int type, const std::string &key) {
   long long ret;
   if (type == dataStructure::ObjString) {
@@ -273,7 +277,8 @@ void DataBase::rdbLoad() {
       continue;
     }
     if (type == ObjHash) {
-      std::multimap<std::string, std::string> tmp;
+      // std::multimap<std::string, std::string> tmp;
+      mutiMapPool<string,string> tmp;
       ret = data.find('#', pos);
       int mkLen = atoi(InterceptString(data, pos + 1, ret).c_str());
       string key = data.substr(ret + 1, mkLen);
@@ -305,7 +310,8 @@ void DataBase::rdbLoad() {
       pos = data.find('!', ret);
       ret = data.find('!', pos + 1);
       int listSize = atoi(InterceptString(data, pos + 1, ret).c_str());
-      std::list<std::string> tmp;
+      // std::list<std::string> tmp;
+      listPool<string> tmp;
       int valueLen = 0;
       while (listSize-- > 0) {
         pos = data.find('$', ret);
